@@ -86,7 +86,7 @@ class LogMelFilterbank(Feature):
     def __init__(self, idim: int, odim: int = 80, sample_rate: int = 16000):
         import librosa
         super().__init__()
-        melmat = librosa.filters.mel(sr=sample_rate, n_fft=idim, n_mels=odim, norm=1, htk=False)
+        melmat = librosa.filters.mel(sr=16000, n_fft=idim, n_mels=odim, norm=1, htk=False)
         self.register_buffer('melmat', torch.from_numpy(melmat.T).float())
 
     @property

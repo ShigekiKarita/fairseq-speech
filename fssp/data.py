@@ -92,9 +92,9 @@ def wav2float(wav, dtype=np.float32):
 
 class ASRDataset(FairseqDataset):
 
-    def __init__(self, wav_scp_path, text_path, tgt_dict, sample_rate=0, shuffle=False):
+    def __init__(self, wav_scp_path, text_path, tgt_dict, shuffle=False):
         super().__init__()
-        self._sample_rate = sample_rate
+        self._sample_rate = None
         self.wav_dict = kaldiio.load_scp(wav_scp_path)
         self.text_dict, self.sizes = load_text(text_path, tgt_dict)
         self.id2key = list(self.text_dict.keys())
@@ -113,9 +113,11 @@ class ASRDataset(FairseqDataset):
 
         sr, wav = self.wav_dict[key]
         wav = wav2float(wav)
-        if self.sample_rate == 0:
+        if self.sample_rate is None:
             self._sample_rate = sr
         elif sr != self.sample_rate:
+            import logging
+            logging.warning(f"resample from {sr} to {self.sample_rate}")
             factor = self.sample_rate / sr
             wav = self.resample(wav, factor)
 
