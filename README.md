@@ -7,7 +7,7 @@ WIP
 
 ```
 pip install fairseq kaldiio
-cd ./egs/asr1/an4
+cd ./egs/an4/asr
 ./run.sh
 ```
 
