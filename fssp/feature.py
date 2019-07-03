@@ -103,7 +103,6 @@ class LogMelFilterbank(Feature):
             fbank output of shape `(batch, seq_len, odim)`
         """
         y = x.matmul(self.melmat)
-        print(x.mean(), y.mean())
         return y
 
 
