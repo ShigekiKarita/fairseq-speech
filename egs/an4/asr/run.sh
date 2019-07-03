@@ -51,7 +51,7 @@ fairseq-train --user-dir $FSSP/fssp -a asr_transformer --task asr \
               --dict ./data/train/dict.txt --cmvn ./data/train/cmvn.pt \
               --train-subset train --valid-subset test \
               --fbank-dim ${fbank} \
-              --max-tokens 30 \
+              --max-tokens 300 \
               --optimizer adam --lr 1e-4 --clip-norm 0.1 \
               --label-smoothing 0.1 --dropout 0.1 \
               --min-lr '1e-09' --lr-scheduler inverse_sqrt --weight-decay 0.0001 \

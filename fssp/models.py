@@ -15,7 +15,7 @@ from fairseq.modules import LayerNorm
 import torch
 import torch.nn.functional as F
 
-from fssp.feature import Feature, ASRFeature
+from fssp.features import Feature, ASRFeature
 
 
 class ASRTransformerEncoder(TransformerEncoder):

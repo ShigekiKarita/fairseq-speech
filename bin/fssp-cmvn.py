@@ -4,8 +4,8 @@ import argparse
 import kaldiio
 import torch
 
-from fssp.data import wav2float
-from fssp.feature import ASRFeature
+from fssp.datasets import wav2float
+from fssp.features import ASRFeature
 
 
 parser = argparse.ArgumentParser()

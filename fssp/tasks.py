@@ -1,7 +1,7 @@
 from fairseq import options, utils
 from fairseq.tasks import FairseqTask, register_task
 
-from fssp.data import ASRDataset
+from fssp.datasets import ASRDataset
 
 
 @register_task('asr')
