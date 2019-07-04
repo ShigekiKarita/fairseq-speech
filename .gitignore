@@ -1,0 +1,14 @@
+*
+
+!*/
+!*.py
+!*.md
+!*.sh
+!*.ipynb
+!*.cfg
+
+!.gitignore
+!LICENSE
+
+.eggs
+venv

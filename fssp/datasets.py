@@ -38,6 +38,7 @@ def collate(
         return {}
 
     def merge(key, left_pad, move_eos_to_beginning=False):
+        # returns (B, maxlen)
         return data_utils.collate_tokens(
             [s[key] for s in samples],
             pad_idx, eos_idx, left_pad, move_eos_to_beginning,
@@ -72,14 +73,14 @@ def collate(
         ntokens = sum(len(s['source']) for s in samples)
 
     batch = {
-        'id': id,
+        'id': id,               # torch.LongTensor
         'nsentences': len(samples),
-        'ntokens': ntokens,
+        'ntokens': ntokens,     # int
         'net_input': {
-            'src_tokens': src_tokens,
-            'src_lengths': src_lengths,
+            'src_tokens': src_tokens,    # torch.FloatTensor(B, max_src_len, idim)
+            'src_lengths': src_lengths,  # torch.LongTensor(B)
         },
-        'target': target,
+        'target': target,  # torch.LongTensor(B, max_tgtlen)
     }
     if prev_output_tokens is not None:
         batch['net_input']['prev_output_tokens'] = prev_output_tokens

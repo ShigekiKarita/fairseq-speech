@@ -13,15 +13,15 @@ cd ./egs/an4/asr
 
 ## roadmap
 
-- feature extraction (DONE)
-- Transformer (DONE)
-- training (DONE)
-- decoding (TODO)
-- evaluation (TODO)
-- more corpora: LibriSpeech, TED-LIUM2/3 (TODO)
-- BPE training/decoding (TODO)
-- RNN (TODO)
-- TTS (TODO)
+- [x] feature extraction (DONE)
+- [x] Transformer (DONE)
+- [x] training (DONE)
+- [ ] decoding (TODO)
+- [ ] evaluation (TODO)
+- [ ] more corpora: LibriSpeech, TED-LIUM2/3 (TODO)
+- [ ] BPE training/decoding (TODO)
+- [ ] RNN (TODO)
+- [ ] TTS (TODO)
 
 ## misc
 

@@ -26,7 +26,7 @@ if [ ! -e $data/sph2pipe_v2.5/sph2pipe ]; then
         wget http://www.openslr.org/resources/3/sph2pipe_v2.5.tar.gz
         tar -xvf sph2pipe_v2.5.tar.gz
         cd sph2pipe_v2.5 || exit 1
-        ${CC} -o sph2pipe ./*.c -lm
+        ${CC:-gcc} -o sph2pipe ./*.c -lm
     )
 fi
 

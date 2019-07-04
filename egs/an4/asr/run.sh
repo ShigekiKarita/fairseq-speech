@@ -8,7 +8,7 @@ data_url=http://www.speech.cs.cmu.edu/databases/an4/
 dict=data/train/dict.txt
 fbank=80
 
-FSSP=../../../
+FSSP=../../..
 PYTHONPATH=$FSSP
 
 # Set bash to 'debug' mode, it will exit on :
@@ -43,7 +43,7 @@ if [ ${stage} -le 0 ]; then
     done
 
     python local/dict_prep.py < data/train/text  > ${dict}
-    $FSSP/bin/fssp-cmvn.py data/train/wav.scp --out data/train/cmvn.pt --dim ${fbank}
+    $FSSP/fssp_cli/cmvn.py data/train/wav.scp --out data/train/cmvn.pt --dim ${fbank}
 fi
 
 fairseq-train --user-dir $FSSP/fssp -a asr_transformer --task asr \
@@ -52,9 +52,9 @@ fairseq-train --user-dir $FSSP/fssp -a asr_transformer --task asr \
               --train-subset train --valid-subset test \
               --fbank-dim ${fbank} \
               --max-tokens 300 \
-              --optimizer adam --lr 1e-4 --clip-norm 0.1 \
+              --optimizer adam --lr 1e-2 --clip-norm 0.1 \
               --label-smoothing 0.1 --dropout 0.1 \
               --min-lr '1e-09' --lr-scheduler inverse_sqrt --weight-decay 0.0001 \
-              --criterion label_smoothed_cross_entropy --max-update 50000 \
-              --warmup-updates 4000 --warmup-init-lr '1e-07' \
+              --criterion cross_entropy_with_accuracy --max-update 50000 \
+              --warmup-updates 1000 --warmup-init-lr '1e-07' \
               --adam-betas '(0.9, 0.98)' # --save-dir checkpoints/transformer
