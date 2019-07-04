@@ -6,11 +6,18 @@ datadir=./downloads
 an4_root=${datadir}/an4
 data_url=http://www.speech.cs.cmu.edu/databases/an4/
 
-token=word  # sentencepiece
+token=sentencepiece # sentencepiece
 bpe_size=100
-dict=data/train/dict.${token}.txt
 fbank=80
 
+if [ $token = "sentencepiece" ]; then
+    bpe_model=data/train/bpe.model
+    suffix=.bpe
+    dict=${bpe_model}.vocab
+else
+    suffix=""
+    dict=data/train/dict.${token}.txt
+fi
 
 FSSP=../../..
 PYTHONPATH=$FSSP
@@ -47,8 +54,7 @@ if [ ${stage} -le 0 ]; then
         cut -d" " -f2- ./data/${x}/text > ./data/${x}/raw_text
     done
 
-    if true; then  # [ $token = "sentencepiece" ]; then
-        bpe_model=data/train/bpe.model
+    if [ $token = "sentencepiece" ]; then
         python $FSSP/fssp_cli/spm_train.py \
                --input=./data/train/raw_text \
                --model_prefix=$bpe_model \
@@ -64,23 +70,23 @@ if [ ${stage} -le 0 ]; then
                    --output_format=piece \
                    --inputs $raw \
                    --outputs ${raw}.bpe
+
+            paste -d' '  <(cut -d' ' -f1 $src) ${raw}.bpe > $src.bpe
         done
+    else
+        $FSSP/fssp_cli/dict_prep.py --token ${token} < data/train/text > ${dict}
+        # fairseq-preprocess --only-source \
+        #                    --trainpref ./data/train/raw_text \
+        #                    --validpref ./data/test/raw_text \
+        #                    --destdir data/bin \
+        #                    --workers 10
     fi
-    # else
-        # $FSSP/fssp_cli/dict_prep.py --token ${token} < data/train/text > ${dict}
-        fairseq-preprocess --only-source \
-                           --trainpref ./data/train/raw_text \
-                           --validpref ./data/test/raw_text \
-                           --destdir data/bin \
-                           --workers 10
-        exit
-    # fi
 
     $FSSP/fssp_cli/cmvn.py data/train/wav.scp --out data/train/cmvn.pt --dim ${fbank}
 fi
 
 fairseq-train --user-dir $FSSP/fssp -a asr_transformer --task asr \
-              --wav ./data/*/wav.scp --text ./data/*/text \
+              --wav ./data/*/wav.scp --text ./data/*/text${suffix} \
               --dict ./data/train/dict.txt --cmvn ./data/train/cmvn.pt \
               --train-subset train --valid-subset test \
               --fbank-dim ${fbank} --num-workers 8  \
