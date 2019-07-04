@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-import argparse
-
 import kaldiio
 import torch
 
@@ -8,15 +6,17 @@ from fssp.datasets import wav2float
 from fssp.features import ASRFeature
 
 
-def main():
-    parser = argparse.ArgumentParser()
+def get_parser():
+    import argparse
+    parser = argparse.ArgumentParser("CMVN computation")
     parser.add_argument("scp", nargs="+")
     parser.add_argument("--out", help="output file")
     parser.add_argument("--dim", type=int, help="fbank dim")
-    args = parser.parse_args()
+    return parser
 
+def main():
+    args = get_parser().parse_args()
     feat = ASRFeature(odim=args.dim, n_subsample=0)
-
     mean = torch.zeros(args.dim)
     mean2 = torch.zeros(args.dim)
     tsum = 0

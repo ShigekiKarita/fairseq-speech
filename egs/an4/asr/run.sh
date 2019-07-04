@@ -5,8 +5,12 @@ stage=${1:--1}
 datadir=./downloads
 an4_root=${datadir}/an4
 data_url=http://www.speech.cs.cmu.edu/databases/an4/
-dict=data/train/dict.txt
+
+token=word  # sentencepiece
+bpe_size=100
+dict=data/train/dict.${token}.txt
 fbank=80
+
 
 FSSP=../../..
 PYTHONPATH=$FSSP
@@ -40,9 +44,38 @@ if [ ${stage} -le 0 ]; then
         for f in text wav.scp utt2spk; do
             sort data/${x}/${f} -o data/${x}/${f}
         done
+        cut -d" " -f2- ./data/${x}/text > ./data/${x}/raw_text
     done
 
-    python local/dict_prep.py < data/train/text  > ${dict}
+    if true; then  # [ $token = "sentencepiece" ]; then
+        bpe_model=data/train/bpe.model
+        python $FSSP/fssp_cli/spm_train.py \
+               --input=./data/train/raw_text \
+               --model_prefix=$bpe_model \
+               --vocab_size=$bpe_size \
+               --character_coverage=1.0 \
+               --model_type=bpe
+
+        for src in ./data/*/text; do
+            raw=$(dirname $src)/raw_text
+            cut -d" " -f2- $src > $raw
+            python $FSSP/fssp_cli/spm_encode.py \
+                   --model ${bpe_model}.model \
+                   --output_format=piece \
+                   --inputs $raw \
+                   --outputs ${raw}.bpe
+        done
+    fi
+    # else
+        # $FSSP/fssp_cli/dict_prep.py --token ${token} < data/train/text > ${dict}
+        fairseq-preprocess --only-source \
+                           --trainpref ./data/train/raw_text \
+                           --validpref ./data/test/raw_text \
+                           --destdir data/bin \
+                           --workers 10
+        exit
+    # fi
+
     $FSSP/fssp_cli/cmvn.py data/train/wav.scp --out data/train/cmvn.pt --dim ${fbank}
 fi
 
@@ -50,11 +83,12 @@ fairseq-train --user-dir $FSSP/fssp -a asr_transformer --task asr \
               --wav ./data/*/wav.scp --text ./data/*/text \
               --dict ./data/train/dict.txt --cmvn ./data/train/cmvn.pt \
               --train-subset train --valid-subset test \
-              --fbank-dim ${fbank} \
-              --max-tokens 300 \
-              --optimizer adam --lr 1e-2 --clip-norm 0.1 \
+              --fbank-dim ${fbank} --num-workers 8  \
+              --encoder-layers 3 --decoder-layers 3 \
+              --max-tokens 800 \
+              --optimizer adam --lr 1e-2 --clip-norm 10.0 \
               --label-smoothing 0.1 --dropout 0.1 \
               --min-lr '1e-09' --lr-scheduler inverse_sqrt --weight-decay 0.0001 \
               --criterion cross_entropy_with_accuracy --max-update 50000 \
-              --warmup-updates 1000 --warmup-init-lr '1e-07' \
+              --warmup-updates 4000 --warmup-init-lr '1e-07' \
               --adam-betas '(0.9, 0.98)' # --save-dir checkpoints/transformer
